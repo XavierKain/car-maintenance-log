@@ -6,6 +6,7 @@ export interface Vehicle {
   plate: string
   mileage: number
   color: string
+  photo?: string  // base64 data URL
 }
 
 export const MAINTENANCE_TYPES = [

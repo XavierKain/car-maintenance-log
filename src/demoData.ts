@@ -1,4 +1,5 @@
 import type { Vehicle, MaintenanceEntry } from './types'
+import { camryPhoto, crvPhoto, f150Photo } from './demoPhotos'
 
 export const demoVehicles: Vehicle[] = [
   {
@@ -9,6 +10,7 @@ export const demoVehicles: Vehicle[] = [
     plate: 'ABC-1234',
     mileage: 45200,
     color: '#2563eb',
+    photo: camryPhoto,
   },
   {
     id: 'demo-v2',
@@ -18,6 +20,7 @@ export const demoVehicles: Vehicle[] = [
     plate: 'XYZ-5678',
     mileage: 72800,
     color: '#dc2626',
+    photo: crvPhoto,
   },
   {
     id: 'demo-v3',
@@ -27,6 +30,7 @@ export const demoVehicles: Vehicle[] = [
     plate: 'TRK-9012',
     mileage: 28500,
     color: '#16a34a',
+    photo: f150Photo,
   },
 ]
 

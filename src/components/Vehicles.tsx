@@ -150,9 +150,13 @@ export function Vehicles() {
               <div key={v.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: v.color }}>
-                      {v.make[0]}
-                    </div>
+                    {v.photo ? (
+                      <img src={v.photo} alt={v.make} className="w-12 h-12 rounded-full object-cover border-2" style={{ borderColor: v.color }} />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: v.color }}>
+                        {v.make[0]}
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-semibold">{v.year} {v.make} {v.model}</h3>
                       <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
