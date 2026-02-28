@@ -38,6 +38,7 @@ export interface MaintenanceEntry {
   notes: string
   reminderDate: string
   reminderMileage: number | null
+  photos: string[]  // base64 data URLs
 }
 
 export type Page = 'vehicles' | 'log' | 'reminders' | 'stats'

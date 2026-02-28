@@ -1,7 +1,28 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { useApp } from '../context'
 import type { MaintenanceEntry } from '../types'
 import { MAINTENANCE_TYPES, TYPE_COLORS } from '../types'
+import { resizeImage } from '../utils/resizeImage'
+
+function PhotoViewer({ photos, onClose }: { photos: string[]; onClose: () => void }) {
+  const [idx, setIdx] = useState(0)
+  return (
+    <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center" onClick={onClose}>
+      <div className="relative max-w-[90vw] max-h-[90vh]" onClick={e => e.stopPropagation()}>
+        <img src={photos[idx]} alt="" className="max-w-full max-h-[85vh] rounded-lg object-contain" />
+        {photos.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+            {photos.map((_, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={`w-2.5 h-2.5 rounded-full ${i === idx ? 'bg-white' : 'bg-white/40'}`} />
+            ))}
+          </div>
+        )}
+        <button onClick={onClose} className="absolute top-2 right-2 w-8 h-8 bg-black/50 text-white rounded-full flex items-center justify-center text-lg">&times;</button>
+      </div>
+    </div>
+  )
+}
 
 function EntryForm({ entry, vehicleId, onSave, onCancel }: {
   entry?: MaintenanceEntry
@@ -10,6 +31,7 @@ function EntryForm({ entry, vehicleId, onSave, onCancel }: {
   onCancel: () => void
 }) {
   const { vehicles } = useApp()
+  const fileRef = useRef<HTMLInputElement>(null)
   const [vId, setVId] = useState(entry?.vehicleId ?? vehicleId ?? vehicles[0]?.id ?? '')
   const [type, setType] = useState<string>(entry?.type ?? MAINTENANCE_TYPES[0])
   const [customType, setCustomType] = useState(MAINTENANCE_TYPES.includes(entry?.type as never) ? '' : entry?.type ?? '')
@@ -20,23 +42,34 @@ function EntryForm({ entry, vehicleId, onSave, onCancel }: {
   const [notes, setNotes] = useState(entry?.notes ?? '')
   const [reminderDate, setReminderDate] = useState(entry?.reminderDate ?? '')
   const [reminderMileage, setReminderMileage] = useState<number | null>(entry?.reminderMileage ?? null)
+  const [photos, setPhotos] = useState<string[]>(entry?.photos ?? [])
 
   const isCustom = type === 'Other'
+
+  const handleAddPhotos = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    const newPhotos: string[] = []
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) continue
+      const resized = await resizeImage(file)
+      newPhotos.push(resized)
+    }
+    setPhotos(prev => [...prev, ...newPhotos])
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const removePhoto = (idx: number) => {
+    setPhotos(prev => prev.filter((_, i) => i !== idx))
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!vId) return
     const finalType = isCustom && customType.trim() ? customType.trim() : type
     const data: Omit<MaintenanceEntry, 'id'> = {
-      vehicleId: vId,
-      type: finalType,
-      date,
-      mileage,
-      cost,
-      shop: shop.trim(),
-      notes: notes.trim(),
-      reminderDate,
-      reminderMileage,
+      vehicleId: vId, type: finalType, date, mileage, cost,
+      shop: shop.trim(), notes: notes.trim(), reminderDate, reminderMileage, photos,
     }
     if (entry) {
       onSave({ ...data, id: entry.id })
@@ -101,6 +134,30 @@ function EntryForm({ entry, vehicleId, onSave, onCancel }: {
         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
           className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none resize-none" />
       </div>
+
+      {/* Photos */}
+      <div>
+        <label className="block text-sm font-medium mb-1">Photos</label>
+        <div className="flex flex-wrap gap-2 mb-2">
+          {photos.map((p, i) => (
+            <div key={i} className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+              <img src={p} alt="" className="w-full h-full object-cover" />
+              <button type="button" onClick={() => removePhoto(i)}
+                className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">&times;</button>
+            </div>
+          ))}
+          <button type="button" onClick={() => fileRef.current?.click()}
+            className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 flex flex-col items-center justify-center text-gray-400 hover:border-blue-400 hover:text-blue-400 transition-colors">
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z" />
+            </svg>
+            <span className="text-[10px] mt-0.5">Add</span>
+          </button>
+        </div>
+        <input ref={fileRef} type="file" accept="image/*" multiple onChange={handleAddPhotos} className="hidden" />
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium mb-1">Reminder Date</label>
@@ -134,6 +191,7 @@ export function MaintenanceLog() {
   const [filterType, setFilterType] = useState<string>('all')
   const [filterDateFrom, setFilterDateFrom] = useState('')
   const [filterDateTo, setFilterDateTo] = useState('')
+  const [viewPhotos, setViewPhotos] = useState<string[] | null>(null)
 
   const filtered = useMemo(() => {
     let list = entries
@@ -162,6 +220,8 @@ export function MaintenanceLog() {
 
   return (
     <div>
+      {viewPhotos && <PhotoViewer photos={viewPhotos} onClose={() => setViewPhotos(null)} />}
+
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-bold">Service History</h2>
         {!showForm && !editing && vehicles.length > 0 && (
@@ -206,9 +266,9 @@ export function MaintenanceLog() {
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)} placeholder="From"
+            <input type="date" value={filterDateFrom} onChange={e => setFilterDateFrom(e.target.value)}
               className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none" />
-            <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)} placeholder="To"
+            <input type="date" value={filterDateTo} onChange={e => setFilterDateTo(e.target.value)}
               className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-700 focus:ring-2 focus:ring-blue-500 outline-none" />
           </div>
 
@@ -221,6 +281,7 @@ export function MaintenanceLog() {
               {filtered.map(entry => {
                 const vehicle = vehicleMap.get(entry.vehicleId)
                 const badgeColor = TYPE_COLORS[entry.type] ?? TYPE_COLORS['Other']
+                const hasPhotos = entry.photos && entry.photos.length > 0
                 return (
                   <div key={entry.id} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between">
@@ -242,6 +303,24 @@ export function MaintenanceLog() {
                         </div>
                         {entry.shop && <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{entry.shop}</p>}
                         {entry.notes && <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{entry.notes}</p>}
+
+                        {/* Photo thumbnails */}
+                        {hasPhotos && (
+                          <div className="flex gap-1.5 mt-2">
+                            {entry.photos.slice(0, 4).map((p, i) => (
+                              <button key={i} onClick={() => setViewPhotos(entry.photos)}
+                                className="relative w-14 h-14 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600">
+                                <img src={p} alt="" className="w-full h-full object-cover" />
+                                {i === 3 && entry.photos.length > 4 && (
+                                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-xs font-medium">
+                                    +{entry.photos.length - 4}
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
                         {(entry.reminderDate || entry.reminderMileage) && (
                           <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                             Next: {entry.reminderDate && entry.reminderDate}{entry.reminderDate && entry.reminderMileage && ' or '}{entry.reminderMileage && `${entry.reminderMileage.toLocaleString()} mi`}
