@@ -82,7 +82,7 @@ function VehicleForm({ vehicle, onSave, onCancel }: {
 }
 
 export function Vehicles() {
-  const { vehicles, entries, addVehicle, updateVehicle, deleteVehicle, setPage, setSelectedVehicleId } = useApp()
+  const { vehicles, entries, addVehicle, updateVehicle, deleteVehicle, setPage, setSelectedVehicleId, loadDemoData } = useApp()
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Vehicle | null>(null)
 
@@ -136,6 +136,10 @@ export function Vehicles() {
           </svg>
           <p className="text-lg font-medium mb-1">No vehicles yet</p>
           <p className="text-sm">Add your first vehicle to start tracking maintenance.</p>
+          <button onClick={loadDemoData}
+            className="mt-4 px-4 py-2 rounded-lg border border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-sm">
+            Load demo data
+          </button>
         </div>
       ) : (
         <div className="space-y-3">

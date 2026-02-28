@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
 import type { Vehicle, MaintenanceEntry, Page } from './types'
 import { loadVehicles, saveVehicles, loadEntries, saveEntries, generateId } from './store'
+import { demoVehicles, demoEntries } from './demoData'
 
 interface AppState {
   vehicles: Vehicle[]
@@ -17,6 +18,7 @@ interface AppState {
   addEntry: (e: Omit<MaintenanceEntry, 'id'>) => void
   updateEntry: (e: MaintenanceEntry) => void
   deleteEntry: (id: string) => void
+  loadDemoData: () => void
 }
 
 const AppContext = createContext<AppState | null>(null)
@@ -91,12 +93,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const loadDemoData = useCallback(() => {
+    setVehicles(() => {
+      saveVehicles(demoVehicles)
+      return demoVehicles
+    })
+    setEntries(() => {
+      saveEntries(demoEntries)
+      return demoEntries
+    })
+  }, [])
+
   return (
     <AppContext value={{
       vehicles, entries, page, selectedVehicleId, darkMode,
       setPage, setSelectedVehicleId, toggleDarkMode,
       addVehicle, updateVehicle, deleteVehicle,
-      addEntry, updateEntry, deleteEntry,
+      addEntry, updateEntry, deleteEntry, loadDemoData,
     }}>
       {children}
     </AppContext>
