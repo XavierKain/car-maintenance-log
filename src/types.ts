@@ -41,7 +41,7 @@ export interface MaintenanceEntry {
   photos: string[]  // base64 data URLs
 }
 
-export type Page = 'vehicles' | 'log' | 'reminders' | 'stats'
+export type Page = 'vehicles' | 'log' | 'reminders' | 'stats' | 'settings'
 
 export const VEHICLE_COLORS = [
   '#2563eb', '#dc2626', '#16a34a', '#ca8a04', '#9333ea',

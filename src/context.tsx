@@ -19,6 +19,8 @@ interface AppState {
   updateEntry: (e: MaintenanceEntry) => void
   deleteEntry: (id: string) => void
   loadDemoData: () => void
+  setVehicles: (v: Vehicle[]) => void
+  setEntries: (e: MaintenanceEntry[]) => void
 }
 
 const AppContext = createContext<AppState | null>(null)
@@ -109,7 +111,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       vehicles, entries, page, selectedVehicleId, darkMode,
       setPage, setSelectedVehicleId, toggleDarkMode,
       addVehicle, updateVehicle, deleteVehicle,
-      addEntry, updateEntry, deleteEntry, loadDemoData,
+      addEntry, updateEntry, deleteEntry, loadDemoData, setVehicles, setEntries,
     }}>
       {children}
     </AppContext>

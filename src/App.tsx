@@ -3,6 +3,7 @@ import { Vehicles } from './components/Vehicles'
 import { MaintenanceLog } from './components/MaintenanceLog'
 import { Reminders } from './components/Reminders'
 import { Stats } from './components/Stats'
+import { Settings } from './components/Settings'
 import { Nav } from './components/Nav'
 
 function AppInner() {
@@ -17,6 +18,7 @@ function AppInner() {
           {page === 'log' && <MaintenanceLog />}
           {page === 'reminders' && <Reminders />}
           {page === 'stats' && <Stats />}
+          {page === 'settings' && <Settings />}
         </main>
       </div>
     </div>
